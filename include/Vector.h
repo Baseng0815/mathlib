@@ -78,30 +78,36 @@ namespace mathlib {
                     Vector(T... v)
                     : _val {v...} {}
 
-                // copy constructor that also allows conversion
-                template<typename T>
-                    Vector(const Vector<dim, T> &other)
+                // copy constructor that also allows conversion and size difference
+                template<int odim, typename T>
+                    Vector(const Vector<odim, T> &other)
                     {
-                        for (int i = 0; i < dim; i++)
+                        for (int i = 0; i < std::min(dim, odim); i++)
                             _val[i] = static_cast<vtype>(other[i]);
                     }
 
-                // move constructor that also allows conversion
-                template<typename T>
+                // default copy constructor
+                Vector(const ThisType &other) = default;
+
+                // default copy assignment
+                Vector &operator=(const ThisType &other) = default;
+
+                // move constructor that also allows conversion and size difference
+                template<int odim, typename T>
                     Vector(Vector<dim, T> &&other)
                     {
-                        for (int i = 0; i < dim; i++)
+                        for (int i = 0; i < std::min(dim, odim); i++)
                             _val[i] = static_cast<vtype>(other[i]);
                     }
 
                 // default move constructor
                 Vector(ThisType &&other) = default;
 
-                // move assignment operator that also allows conversion
-                template<typename T>
+                // move assignment operator that also allows conversion and size difference
+                template<int odim, typename T>
                     ThisType &operator=(Vector<dim, T> &&other) noexcept
                     {
-                        for (int i = 0; i < dim; i++)
+                        for (int i = 0; i < std::min(dim, odim); i++)
                             _val[i] = static_cast<vtype>(other[i]);
 
                         return *this;
@@ -233,10 +239,11 @@ namespace mathlib {
                 }
 
                 // print the vector in a formatted way
-                void print() const
+                void print(bool useBetterPrecision = false) const
                 {
                     std::stringstream ss;
-                    ss.precision(std::numeric_limits<vtype>::max_digits10);
+                    if (useBetterPrecision)
+                        ss.precision(std::numeric_limits<vtype>::max_digits10);
                     ss << "[ ";
                     for (int n = 0; n < dim; n++)
                         ss << _val[n] << " ";

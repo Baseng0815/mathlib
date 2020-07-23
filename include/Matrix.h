@@ -26,6 +26,7 @@ namespace mathlib {
         };
 
     // primary template
+    // row-major order
     template<int rows, int cols, typename vtype = float>
         class Matrix : public MaybeIsQuadratic<rows, cols, vtype> {
             private:
