@@ -5,12 +5,17 @@
 #include "../include/Convert.h"
 #include "../include/MatrixTransform.h"
 
+#include <limits>
+
 using namespace mathlib;
 
 void testVec() {
     std::cout << "testing vector..." << std::endl;
     Vector3 vec {0, 2, 1};
     ASSERT_EQUAL(vec, (Vector3 {0, 2, 1}));
+    (vec * 2.0f).print();
+    (2.0f * vec).print();
+    ASSERT_EQUAL(vec * 2.0f, 2.0f * vec);
     vec.print();
 }
 
@@ -85,6 +90,14 @@ void testOperations() {
     xrot3.print();
     yrot3.print();
     zrot3.print();
+
+    std::cout << "Testing some conversions...\n";
+    Vector3d vd {1.182938394828, -2.49281739292, 5.495030919283};
+    Vector3f vf = vd;
+    Vector3i vi = vf;
+    vd.print();
+    vf.print();
+    vi.print();
 }
 
 int main(int, char**) {

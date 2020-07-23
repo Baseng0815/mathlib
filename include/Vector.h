@@ -3,48 +3,49 @@
 #include <array>
 #include <cmath>
 #include <string>
+#include <limits>
 #include <sstream>
 #include <iostream>
 #include <type_traits>
 
 namespace mathlib {
-    template<int dim>
+    template<int dim, typename vtype>
         class Vector;
 
-    template<int dim, typename = void>
+    template<int dim, typename vtype, typename = void>
         class MaybeHasX {};
 
-    template<int dim>
-        class MaybeHasX<dim, std::enable_if_t<(dim > 0)>> {
+    template<int dim, typename vtype>
+        class MaybeHasX<dim, vtype, std::enable_if_t<(dim > 0)>> {
             public:
-                double& x() { return (reinterpret_cast<Vector<dim>*>(this))->operator[](0); }
-                double x() const { return (reinterpret_cast<const Vector<dim>*>(this))->operator[](0); }
+                vtype& x() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](0); }
+                vtype x() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](0); }
         };
 
-    template<int dim, typename = void>
+    template<int dim, typename vtype, typename = void>
         class MaybeHasY {};
 
-    template<int dim>
-        class MaybeHasY<dim, std::enable_if_t<(dim > 1)>> {
+    template<int dim, typename vtype>
+        class MaybeHasY<dim, vtype, std::enable_if_t<(dim > 1)>> {
             public:
-                double& y() { return (reinterpret_cast<Vector<dim>*>(this))->operator[](1); }
-                double y() const { return (reinterpret_cast<const Vector<dim>*>(this))->operator[](1); }
+                vtype& y() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](1); }
+                vtype y() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](1); }
         };
 
-    template<int dim, typename = void>
+    template<int dim, typename vtype, typename = void>
         class MaybeHasZ {};
 
-    template<int dim>
-        class MaybeHasZ<dim, std::enable_if_t<(dim > 2)>> {
+    template<int dim, typename vtype>
+        class MaybeHasZ<dim, vtype, std::enable_if_t<(dim > 2)>> {
             public:
-                double& z() { return (reinterpret_cast<Vector<dim>*>(this))->operator[](2); }
-                double z() const { return (reinterpret_cast<const Vector<dim>*>(this))->operator[](2); }
+                vtype& z() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](2); }
+                vtype z() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](2); }
 
                 // todo maybe learn some math and implement this for n-dimensional vector spaces
-                Vector<dim> cross(const Vector<dim>& other) const
+                Vector<dim, vtype> cross(const Vector<dim, vtype>& other) const
                 {
-                    const Vector<dim>* pThis = reinterpret_cast<const Vector<dim>*>(this);
-                    return Vector<dim> {
+                    const Vector<dim, vtype>* pThis = static_cast<const Vector<dim, vtype>*>(this);
+                    return Vector<dim, vtype> {
                         pThis->y() * other.z() - pThis->z() * other.y(),
                             pThis->z() * other.x() - pThis->x() * other.z(),
                             pThis->x() * other.y() - pThis->y() * other.x(),
@@ -52,58 +53,94 @@ namespace mathlib {
                 }
         };
 
-    template<int dim, typename = void>
+    template<int dim, typename vtype, typename = void>
         class MaybeHasW {};
 
-    template<int dim>
-        class MaybeHasW<dim, std::enable_if_t<(dim > 3)>> {
+    template<int dim, typename vtype>
+        class MaybeHasW<dim, vtype, std::enable_if_t<(dim > 3)>> {
             public:
-                double& w() { return (reinterpret_cast<Vector<dim>>(this))->operator[](3); }
+                vtype& w() { return (static_cast<Vector<dim, vtype>>(this))->operator[](3); }
         };
 
-    template<int dim>
-        class Vector : public MaybeHasX<dim>, public MaybeHasY<dim>, public MaybeHasZ<dim>, public MaybeHasW<dim> {
+    template<int dim, typename vtype = float>
+        class Vector : public MaybeHasX<dim, vtype>, public MaybeHasY<dim, vtype>, public MaybeHasZ<dim, vtype>, public MaybeHasW<dim, vtype> {
             private:
-                std::array<double, dim> _val = {0};
+                std::array<vtype, dim> _val = {0};
+
+                using ThisType = Vector<dim, vtype>;
 
             public:
+                // default constructor that zero-initializes the vector
                 Vector() = default;
-                Vector(const Vector& other) = default;
+
+                // constructor that takes elements from which to construct the vector
                 template<typename... T>
                     Vector(T... v)
                     : _val {v...} {}
 
+                // copy constructor that also allows conversion
+                template<typename T>
+                    Vector(const Vector<dim, T> &other)
+                    {
+                        for (int i = 0; i < dim; i++)
+                            _val[i] = static_cast<vtype>(other[i]);
+                    }
+
+                // move constructor that also allows conversion
+                template<typename T>
+                    Vector(Vector<dim, T> &&other)
+                    {
+                        for (int i = 0; i < dim; i++)
+                            _val[i] = static_cast<vtype>(other[i]);
+                    }
+
+                // default move constructor
+                Vector(ThisType &&other) = default;
+
+                // move assignment operator that also allows conversion
+                template<typename T>
+                    ThisType &operator=(Vector<dim, T> &&other) noexcept
+                    {
+                        for (int i = 0; i < dim; i++)
+                            _val[i] = static_cast<vtype>(other[i]);
+
+                        return *this;
+                    }
+
+                // default move assignment operator
+                ThisType &operator=(ThisType &&other) noexcept = default;
+
                 // element-wise operations
-                Vector<dim> operator+(const Vector<dim>& other) const
+                ThisType operator+(const ThisType& other) const
                 {
-                    Vector<dim> result;
+                    ThisType result;
                     for (int n = 0; n < dim; n++) {
                         result[n] = _val[n] + other._val[n];
                     }
                     return result;
                 }
 
-                Vector<dim> operator-(const Vector<dim>& other) const
+                ThisType operator-(const ThisType& other) const
                 {
-                    Vector<dim> result;
+                    ThisType result;
                     for (int n = 0; n < dim; n++) {
                         result[n] = _val[n] - other._val[n];
                     }
                     return result;
                 }
 
-                Vector<dim> operator*(const Vector<dim>& other) const
+                ThisType operator*(const ThisType& other) const
                 {
-                    Vector<dim> result;
+                    ThisType result;
                     for (int n = 0; n < dim; n++) {
                         result[n] = _val[n] * other._val[n];
                     }
                     return result;
                 }
 
-                Vector<dim> operator/(const Vector<dim>& other) const
+                ThisType operator/(const ThisType& other) const
                 {
-                    Vector<dim> result;
+                    ThisType result;
                     for (int n = 0; n < dim; n++) {
                         result[n] = _val[n] / other._val[n];
                     }
@@ -111,24 +148,34 @@ namespace mathlib {
                 }
 
                 // scalar operations
-                Vector<dim> operator*(double scale) const
+                template<typename T>
+                    ThisType operator*(T scale) const
+                    {
+                        ThisType result;
+                        for (int n = 0; n < dim; n++) {
+                            result[n] = _val[n] * scale;
+                        }
+                        return result;
+                    }
+
+                template<typename T>
+                    ThisType operator/(T scale) const
+                    {
+                        ThisType result;
+                        for (int n = 0; n < dim; n++) {
+                            result[n] = _val[n] / scale;
+                        }
+                        return result;
+                    }
+
+                ThisType operator-() const
                 {
-                    Vector<dim> result;
+                    ThisType result;
                     for (int n = 0; n < dim; n++) {
-                        result[n] = _val[n] * scale;
+                        result[n] = -_val[n];
                     }
                     return result;
                 }
-
-                Vector<dim> operator/(double scale) const
-                {
-                    Vector<dim> result;
-                    for (int n = 0; n < dim; n++) {
-                        result[n] = _val[n] / scale;
-                    }
-                    return result;
-                }
-
 
                 bool operator==(const Vector& other) const
                 {
@@ -143,24 +190,24 @@ namespace mathlib {
                     return !((*this) == other);
                 }
 
-                const double operator[](int row) const
+                const vtype operator[](int row) const
                 {
                     return _val[row];
                 }
 
-                double& operator[](int row)
+                vtype& operator[](int row)
                 {
                     return _val[row];
                 }
 
                 // calculate the length of the vector
-                double getLength() const
+                vtype getLength() const
                 {
                     return std::sqrt(getLengthSquared());
                 }
 
                 // calculate the length squared of the vector (self-dot)
-                double getLengthSquared() const
+                vtype getLengthSquared() const
                 {
                     return dot(*this);
                 }
@@ -177,9 +224,9 @@ namespace mathlib {
                     (*this) = getNormalized();
                 }
 
-                double dot(const Vector<dim>& other) const
+                vtype dot(const ThisType& other) const
                 {
-                    double sum = 0;
+                    vtype sum = 0;
                     for (int n = 0; n < dim; n++)
                         sum += _val[n] * other._val[n];
                     return sum;
@@ -189,6 +236,7 @@ namespace mathlib {
                 void print() const
                 {
                     std::stringstream ss;
+                    ss.precision(std::numeric_limits<vtype>::max_digits10);
                     ss << "[ ";
                     for (int n = 0; n < dim; n++)
                         ss << _val[n] << " ";
@@ -201,8 +249,35 @@ namespace mathlib {
                 }
         };
 
+    template<int dim, typename vtype>
+        Vector<dim, vtype> operator*(const vtype &scale, const Vector<dim, vtype> &vec)
+        {
+            return vec * scale;
+        }
+    template<int dim, typename vtype>
+        Vector<dim, vtype> operator/(const vtype &scale, const Vector<dim, vtype> &vec)
+        {
+            return vec * scale;
+        }
+
+
     typedef Vector<1> Vector1;
     typedef Vector<2> Vector2;
     typedef Vector<3> Vector3;
     typedef Vector<4> Vector4;
+
+    typedef Vector<1, double> Vector1d;
+    typedef Vector<2, double> Vector2d;
+    typedef Vector<3, double> Vector3d;
+    typedef Vector<4, double> Vector4d;
+
+    typedef Vector<1, float> Vector1f;
+    typedef Vector<2, float> Vector2f;
+    typedef Vector<3, float> Vector3f;
+    typedef Vector<4, float> Vector4f;
+
+    typedef Vector<1, int> Vector1i;
+    typedef Vector<2, int> Vector2i;
+    typedef Vector<3, int> Vector3i;
+    typedef Vector<4, int> Vector4i;
 }
