@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 add_executable(test_simple test_simple.cpp)
 
 find_library(MATHLIB_LIBRARY mathlib HINTS /home/bastian/mathlib/build)

@@ -18,7 +18,7 @@ namespace mathlib {
     template<int dim, typename vtype>
         class MaybeHasX<dim, vtype, std::enable_if_t<(dim > 0)>> {
             public:
-                vtype& x() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](0); }
+                vtype &x() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](0); }
                 vtype x() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](0); }
         };
 
@@ -28,7 +28,7 @@ namespace mathlib {
     template<int dim, typename vtype>
         class MaybeHasY<dim, vtype, std::enable_if_t<(dim > 1)>> {
             public:
-                vtype& y() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](1); }
+                vtype &y() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](1); }
                 vtype y() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](1); }
         };
 
@@ -38,11 +38,11 @@ namespace mathlib {
     template<int dim, typename vtype>
         class MaybeHasZ<dim, vtype, std::enable_if_t<(dim > 2)>> {
             public:
-                vtype& z() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](2); }
+                vtype &z() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](2); }
                 vtype z() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](2); }
 
                 // todo maybe learn some math and implement this for n-dimensional vector spaces
-                Vector<dim, vtype> cross(const Vector<dim, vtype>& other) const
+                Vector<dim, vtype> cross(const Vector<dim, vtype> &other) const
                 {
                     const Vector<dim, vtype>* pThis = static_cast<const Vector<dim, vtype>*>(this);
                     return Vector<dim, vtype> {
@@ -59,7 +59,8 @@ namespace mathlib {
     template<int dim, typename vtype>
         class MaybeHasW<dim, vtype, std::enable_if_t<(dim > 3)>> {
             public:
-                vtype& w() { return (static_cast<Vector<dim, vtype>>(this))->operator[](3); }
+                vtype &w() { return (static_cast<Vector<dim, vtype>*>(this))->operator[](3); }
+                vtype w() const { return (static_cast<const Vector<dim, vtype>*>(this))->operator[](3); }
         };
 
     template<int dim, typename vtype = float>
@@ -71,50 +72,79 @@ namespace mathlib {
 
             public:
                 // default constructor that zero-initializes the vector
+#ifdef _DEBUG
+                Vector()
+                    : _val {0}
+                {
+                    std::cout << "vector default constructor" << std::endl;
+                }
+#else
                 Vector() = default;
+#endif
 
                 // constructor that takes elements from which to construct the vector
                 template<typename... T>
                     Vector(T... v)
-                    : _val {v...} {}
+                    : _val {v...}
+                {
+#ifdef _DEBUG
+                    std::cout << "vector value constructor" << std::endl;
+#endif
+                }
 
                 // copy constructor that also allows conversion and size difference
                 template<int odim, typename T>
                     Vector(const Vector<odim, T> &other)
                     {
+#ifdef _DEBUG
+                        std::cout << "vector conversion copy constructor from " << &other << " to " << this << std::endl;
+#endif
                         for (int i = 0; i < std::min(dim, odim); i++)
                             _val[i] = static_cast<vtype>(other[i]);
                     }
 
                 // default copy constructor
+#ifdef _DEBUG
+                Vector(const ThisType &other)
+                    : _val(other._val)
+                {
+                    std::cout << "vector default copy constructor from " << &other << " to " << this << std::endl;
+                }
+#else
                 Vector(const ThisType &other) = default;
+#endif
 
                 // default copy assignment
+#ifdef _DEBUG
+                Vector &operator=(const ThisType &other)
+                {
+                    std::cout << "vector default copy assignment from " << &other << " to " << this << std::endl;
+                    _val = other._val;
+                }
+#else
                 Vector &operator=(const ThisType &other) = default;
-
-                // move constructor that also allows conversion and size difference
-                template<int odim, typename T>
-                    Vector(Vector<dim, T> &&other)
-                    {
-                        for (int i = 0; i < std::min(dim, odim); i++)
-                            _val[i] = static_cast<vtype>(other[i]);
-                    }
+#endif
 
                 // default move constructor
-                Vector(ThisType &&other) = default;
-
-                // move assignment operator that also allows conversion and size difference
-                template<int odim, typename T>
-                    ThisType &operator=(Vector<dim, T> &&other) noexcept
+#ifdef _DEBUG
+                Vector(ThisType &&other) noexcept
+                    : _val(std::move(other._val))
                     {
-                        for (int i = 0; i < std::min(dim, odim); i++)
-                            _val[i] = static_cast<vtype>(other[i]);
-
-                        return *this;
+                        std::cout << "vector move constructor to " << this << std::endl;
                     }
-
+#else
+                Vector(ThisType &&other) noexcept = default;
+#endif
                 // default move assignment operator
+#ifdef _DEBUG
+                ThisType &operator=(ThisType &&other) noexcept
+                {
+                    std::cout << "vector move assignment to " << this << std::endl;
+                    _val = std::move(other._val);
+                }
+#else
                 ThisType &operator=(ThisType &&other) noexcept = default;
+#endif
 
                 // element-wise operations
                 ThisType operator+(const ThisType& other) const

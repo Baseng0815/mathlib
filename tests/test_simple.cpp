@@ -17,6 +17,11 @@ void testVec() {
     (2.0f * vec).print();
     ASSERT_EQUAL(vec * 2.0f, 2.0f * vec);
     vec.print();
+    Vector4 v4 {-1, 3.23, 2.1, 4};
+    Vector<5, int> v5i = v4;
+    v4.print();
+    v5i.print();
+    std::cout << v4.w() << " " << v5i.w() << std::endl;
 }
 
 void testMatrix() {
@@ -50,7 +55,7 @@ void testOperations() {
     Vector4 zhat {0, 0, 1};
 
     {
-        std::cout << "X rotation 1\n";
+        std::cout << "X rotation 1" << std::endl;
         Matrix4 rot1 = createRotationX(toRadians(90.0));
         rot1.print();
         Vector4 xrot1 = rot1 * xhat;
@@ -63,7 +68,7 @@ void testOperations() {
     }
 
     {
-        std::cout << "X rotation 2\n";
+        std::cout << "X rotation 2" << std::endl;
         Matrix4 rot1 = createRotationX(toRadians(45.0));
         rot1.print();
 
@@ -77,7 +82,7 @@ void testOperations() {
     }
 
     {
-        std::cout << "Y rotation\n";
+        std::cout << "Y rotation" << std::endl;
         Matrix4 rot2 = createRotationY(toRadians(90.0));
         rot2.print();
 
@@ -91,7 +96,7 @@ void testOperations() {
     }
 
     {
-        std::cout << "Z rotation\n";
+        std::cout << "Z rotation" << std::endl;
         Matrix4 rot3 = createRotationZ(toRadians(90.0));
         rot3.print();
 
@@ -105,7 +110,47 @@ void testOperations() {
     }
 
     {
-        std::cout << "Testing some conversions...\n";
+        std::cout << "Testing matrix operations..." << std::endl;;
+        Matrix4 ma = Matrix4::makeIdentity();
+        Matrix4 mb = Matrix4::makeIdentity();
+        Matrix4 mc = ma * mb;
+        ma.print();
+        mb.print();
+        mc.print();
+        ASSERT_EQUAL(ma, mb);
+        ASSERT_EQUAL(ma, mc);
+        ASSERT_EQUAL(mb, mc);
+
+        Matrix<2,3,float> md {1.f, 2.f, 3.f, 4.f, 5.f, 6.f};
+        Matrix<3,2,float> me {7.f, 8.f, 9.f, 10.f, 11.f, 12.f};
+        auto mf = md * me;
+        md.print();
+        me.print();
+        mf.print();
+        ASSERT_EQUAL(mf, (Matrix<2,2,float> {58.f, 64.f, 139.f, 154.f}));
+        auto mg = ma * mb * mc;
+        mg.print();
+
+        Matrix4 rotationMatrix = createRotationZ(90.0f)
+            * createRotationY(90.0f)
+            * createRotationX(90.0f);
+        Matrix4 res = createTranslation(Vector3 {0.f, 1.f, 2.f}) * rotationMatrix;
+        res.print();
+
+        Matrix4 perspProj = createPerspectiveProjection(90.0f, 4/3.0f, 1.0f, 100.f);
+        perspProj.print();
+
+        Vector4 p {1, 1, 0, 1};
+        Matrix4 scale = createScale(Vector3 {1, 1, 1});
+        Matrix4 translate = createTranslation(Vector3 {0, 0, 0});
+
+        Vector4 np = perspProj * scale * translate * p;
+        p.print();
+        np.print();
+    }
+
+    {
+        std::cout << "Testing some conversions..." << std::endl;
         Vector3d vd {1.182938394828, -2.49281739292, 5.495030919283};
         Vector3f vf = vd;
         Vector3i vi = vf;

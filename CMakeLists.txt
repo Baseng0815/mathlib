@@ -20,12 +20,12 @@ set(SOURCES
 add_library(mathlib SHARED
     ${SOURCES})
 
-
 install(
     TARGETS mathlib
     LIBRARY DESTINATION /usr/local/lib)
 install(FILES ${HEADERS}
     DESTINATION /usr/local/include/mathlib)
 
+add_compile_definitions(_DEBUG)
 enable_testing()
 add_subdirectory(tests)

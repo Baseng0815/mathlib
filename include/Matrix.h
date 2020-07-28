@@ -99,16 +99,18 @@ namespace mathlib {
                 }
 
                 template<int ocols>
-                    Matrix<rows, ocols, vtype> operator*(const Matrix<cols, ocols, vtype>& other) const
+                    Matrix<rows, ocols, vtype> operator*(const Matrix<cols, ocols, vtype> &other) const
                     {
                         Matrix<rows, ocols, vtype> result;
                         for (int row = 0; row < rows; row++) {
                             for (int col = 0; col < ocols; col++) {
-                                for (int n = 0; n <  cols; n++) {
+                                for (int n = 0; n < cols; n++) {
                                     result[row][col] += _val[row][n] * other[n][col];
                                 }
                             }
                         }
+
+                        return result;
                     }
 
                 // vector rows must be equal to matrix columns
