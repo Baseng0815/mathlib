@@ -29,6 +29,15 @@ void testMatrix() {
     auto mat = Matrix3::makeIdentity();
     ASSERT_EQUAL(mat, (Matrix3 {1, 0, 0, 0, 1, 0, 0, 0, 1}));
     mat.print();
+
+    Matrix<4, 2> m
+    {
+        1, 2,
+        3, 4,
+        5, 6,
+        7, 8
+    };
+    m.print();
 }
 
 void testOperations() {
@@ -167,6 +176,8 @@ void testOperations() {
         v2f.print();
         v3f.print();
 
+        Matrix4 trans = createOrthographicProjection(0.f, 800.f, 0.f, 600.f);
+        trans.print();
     }
 }
 

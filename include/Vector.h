@@ -72,79 +72,43 @@ namespace mathlib {
 
             public:
                 // default constructor that zero-initializes the vector
-#ifdef _DEBUG
-                Vector()
-                    : _val {0}
-                {
-                    std::cout << "vector default constructor" << std::endl;
-                }
-#else
                 Vector() = default;
-#endif
 
                 // constructor that takes elements from which to construct the vector
                 template<typename... T>
                     Vector(T... v)
                     : _val {v...}
-                {
-#ifdef _DEBUG
-                    std::cout << "vector value constructor" << std::endl;
-#endif
-                }
+                {}
 
                 // copy constructor that also allows conversion and size difference
                 template<int odim, typename T>
                     Vector(const Vector<odim, T> &other)
                     {
-#ifdef _DEBUG
-                        std::cout << "vector conversion copy constructor from " << &other << " to " << this << std::endl;
-#endif
                         for (int i = 0; i < std::min(dim, odim); i++)
                             _val[i] = static_cast<vtype>(other[i]);
                     }
 
                 // default copy constructor
-#ifdef _DEBUG
-                Vector(const ThisType &other)
-                    : _val(other._val)
-                {
-                    std::cout << "vector default copy constructor from " << &other << " to " << this << std::endl;
-                }
-#else
                 Vector(const ThisType &other) = default;
-#endif
 
                 // default copy assignment
-#ifdef _DEBUG
-                Vector &operator=(const ThisType &other)
-                {
-                    std::cout << "vector default copy assignment from " << &other << " to " << this << std::endl;
-                    _val = other._val;
-                }
-#else
                 Vector &operator=(const ThisType &other) = default;
-#endif
+
+                // copy assignment that also allows conversion
+                template<int odim, typename T>
+                    Vector &operator=(const Vector<odim, T> &other)
+                    {
+                        for (int i = 0; i < std::min(dim, odim); i++)
+                            _val[i] = static_cast<vtype>(other[i]);
+
+                        return *this;
+                    }
 
                 // default move constructor
-#ifdef _DEBUG
-                Vector(ThisType &&other) noexcept
-                    : _val(std::move(other._val))
-                    {
-                        std::cout << "vector move constructor to " << this << std::endl;
-                    }
-#else
                 Vector(ThisType &&other) noexcept = default;
-#endif
+
                 // default move assignment operator
-#ifdef _DEBUG
-                ThisType &operator=(ThisType &&other) noexcept
-                {
-                    std::cout << "vector move assignment to " << this << std::endl;
-                    _val = std::move(other._val);
-                }
-#else
                 ThisType &operator=(ThisType &&other) noexcept = default;
-#endif
 
                 // element-wise operations
                 ThisType operator+(const ThisType& other) const
@@ -181,6 +145,37 @@ namespace mathlib {
                         result[n] = _val[n] / other._val[n];
                     }
                     return result;
+                }
+
+                ThisType &operator+=(const ThisType& other)
+                {
+                    for (int n = 0; n < dim; n++) {
+                        _val[n] += other._val[n];
+                    }
+                    return *this;
+                }
+
+                ThisType &operator-=(const ThisType& other)
+                {
+                    for (int n = 0; n < dim; n++) {
+                        _val[n] -= other._val[n];
+                    }
+                    return *this;
+                }
+
+                ThisType &operator*=(const ThisType& other)
+                {
+                    for (int n = 0; n < dim; n++) {
+                        _val[n] *= other._val[n];
+                    }
+                    return *this;
+                }
+                ThisType &operator/=(const ThisType& other)
+                {
+                    for (int n = 0; n < dim; n++) {
+                        _val[n] /= other._val[n];
+                    }
+                    return *this;
                 }
 
                 // scalar operations

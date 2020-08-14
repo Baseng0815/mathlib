@@ -26,7 +26,7 @@ namespace mathlib {
         };
 
     // primary template
-    // row-major order
+    // column-major order
     template<int rows, int cols, typename vtype = float>
         class Matrix : public MaybeIsQuadratic<rows, cols, vtype> {
             private:
@@ -52,21 +52,15 @@ namespace mathlib {
                                 _val[row][col] = static_cast<vtype>(other[row][col]);
                     }
 
-                // move constructor that also allows conversion
-                template<typename T>
-                    Matrix(Matrix<rows, cols, T> &&other)
-                    {
-                        for (int row = 0; row < rows; row++)
-                            for (int col = 0; col < cols; col++)
-                                _val[row][col] = static_cast<vtype>(other[row][col]);
-                    }
+                // default copy constructor
+                Matrix(const Matrix &other) = default;
 
-                // default move constructor
-                Matrix(ThisType &&other) = default;
+                // default copy assignment
+                Matrix &operator=(const Matrix &other) = default;
 
-                // move assignment operator that also allows conversion
+                // copy assignment that also allows conversion
                 template<typename T>
-                    ThisType &operator=(Matrix<rows, cols, T> &&other)
+                    Matrix &operator=(const Matrix<rows, cols, T> &other)
                     {
                         for (int row = 0; row < rows; row++)
                             for (int col = 0; col < cols; col++)
@@ -75,9 +69,13 @@ namespace mathlib {
                         return *this;
                     }
 
-                // default move assignment operator
-                ThisType &operator=(ThisType &&other) = default;
+                // default move constructor
+                Matrix(ThisType &&other) noexcept = default;
 
+                // default move assignment operator
+                ThisType &operator=(ThisType &&other) noexcept = default;
+
+                // operations
                 ThisType operator+(const ThisType& other) const
                 {
                     ThisType result;

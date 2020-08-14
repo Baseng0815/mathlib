@@ -20,16 +20,33 @@ namespace mathlib {
 
         return Matrix4
         {
-            2.0f*clipNear / (r-l), 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f*clipNear / (t-b), 0.0f, 0.0f,
-            (r+l) / (r-l), (t+b) / (t-b), -(clipFar+clipNear) / (clipFar-clipNear), -1.0f,
-            0.0f, 0.0f, -2.0f*clipFar*clipNear / (clipFar-clipNear), 0.0f
+            2.f * clipNear / (r - l), 0.f, (r + l) / (r - l), 0.f,
+            0.f, 2.f * clipNear / (t - b), (t + b) / (t - b), 0.f,
+            0.f, 0.f, -(clipFar + clipNear) / (clipFar - clipNear), - 2.f * clipFar * clipNear / (clipFar - clipNear),
+            0.f, 0.f, -1.f, 0.f
         };
     }
 
-    Matrix4 createOrthographicProjection(int left, int right, int up, int down)
+    Matrix4 createOrthographicProjection(float left, float right, float top, float bot, float clipNear, float clipFar)
     {
+        return Matrix4
+        {
+            2.f / (right - left), 0.f, 0.f, -(right + left) / (right - left),
+            0.f, 2.f / (top - bot), 0.f, -(top + bot) / (top - bot),
+            0.f, 0.f, -2.f / (clipFar - clipNear), -(clipFar + clipNear) / (clipFar - clipNear),
+            0.f, 0.f, 0.f, 1.f
+        };
+    }
 
+    Matrix4 createOrthographicProjection(float left, float right, float top, float bot)
+    {
+        return Matrix4
+        {
+            2.f / (right - left), 0.f, 0.f, -(right + left) / (right - left),
+            0.f, 2.f / (top - bot), 0.f, -(top + bot) / (top - bot),
+            0.f, 0.f, 1.f, 0.f,
+            0.f, 0.f, 0.f, 1.f
+        };
     }
 
     Matrix4 createViewMatrix(const Vector3 &position, const Vector3 &front, const Vector3 &up)
@@ -43,6 +60,14 @@ namespace mathlib {
             0.0f, 1.0f, 0.0f, position.y(),
             0.0f, 0.0f, 1.0f, position.z(),
             0.0f, 0.0f, 0.0f, 1.0f
+        };
+    }
+
+    Matrix3 createTranslation(const Vector2 &position)
+    {
+        return Matrix3 {1.0f, 0.0f, position.x(),
+            0.0f, 1.0f, position.y(),
+            0.0f, 0.0f, 1.0f
         };
     }
 
@@ -70,14 +95,6 @@ namespace mathlib {
             std::sin(angle), std::cos(angle), 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
-        };
-    }
-
-    Matrix3 createTranslation(const Vector2 &position)
-    {
-        return Matrix3 {1.0f, 0.0f, position.x(),
-            0.0f, 1.0f, position.y(),
-            0.0f, 0.0f, 1.0f
         };
     }
 

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(mathlib LANGUAGES CXX
+project(mathlib
+    LANGUAGES CXX
     VERSION 1.0.0
     DESCRIPTION "a custom mathematics library")
 
@@ -22,10 +23,7 @@ add_library(mathlib SHARED
 
 install(
     TARGETS mathlib
-    LIBRARY DESTINATION /usr/local/lib)
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
 install(FILES ${HEADERS}
-    DESTINATION /usr/local/include/mathlib)
-
-add_compile_definitions(_DEBUG)
-enable_testing()
-add_subdirectory(tests)
+    DESTINATION include/mathlib)
