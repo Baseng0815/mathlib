@@ -182,23 +182,23 @@ namespace mathlib {
                 }
         };
 
-    typedef Matrix<1,1> Matrix1;
-    typedef Matrix<2,2> Matrix2;
-    typedef Matrix<3,3> Matrix3;
-    typedef Matrix<4,4> Matrix4;
+    using Matrix1 = Matrix<1,1>;
+    using Matrix2 = Matrix<2,2>;
+    using Matrix3 = Matrix<3,3>;
+    using Matrix4 = Matrix<4,4>;
 
-    typedef Matrix<1,1, double> Matrix1d;
-    typedef Matrix<2,2, double> Matrix2d;
-    typedef Matrix<3,3, double> Matrix3d;
-    typedef Matrix<4,4, double> Matrix4d;
+    using Matrix1d = Matrix<1,1, double> ;
+    using Matrix2d = Matrix<2,2, double> ;
+    using Matrix3d = Matrix<3,3, double> ;
+    using Matrix4d = Matrix<4,4, double> ;
 
-    typedef Matrix<1,1, float> Matrix1f;
-    typedef Matrix<2,2, float> Matrix2f;
-    typedef Matrix<3,3, float> Matrix3f;
-    typedef Matrix<4,4, float> Matrix4f;
+    using Matrix1f = Matrix<1,1, float>;
+    using Matrix2f = Matrix<2,2, float>;
+    using Matrix3f = Matrix<3,3, float>;
+    using Matrix4f = Matrix<4,4, float>;
 
-    typedef Matrix<1,1, int> Matrix1i;
-    typedef Matrix<2,2, int> Matrix2i;
-    typedef Matrix<3,3, int> Matrix3i;
-    typedef Matrix<4,4, int> Matrix4i;
+    using Matrix1i = Matrix<1,1, int>;
+    using Matrix2i = Matrix<2,2, int>;
+    using Matrix3i = Matrix<3,3, int>;
+    using Matrix4i = Matrix<4,4, int>;
 }
